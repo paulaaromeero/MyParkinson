@@ -1,0 +1,579 @@
+
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MyParkinson</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0; padding: 0;
+      background: #ffffff;
+      color: #4e342e;
+    }
+    header {
+      background: #6d4c41;
+      color: white;
+      padding: 1em;
+      position: relative;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .menu-icon {
+      font-size: 1.5em;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    /* Menú desplegable */
+    #sideMenu {
+      background: #6d4c41;
+      color: white;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      width: 200px;
+      border-radius: 0 0 5px 5px;
+      overflow: hidden;
+      max-height: 0;
+      transition: max-height 0.3s ease;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+      z-index: 1000;
+    }
+
+    #sideMenu.show {
+      max-height: 600px; /* suficiente para todas las opciones */
+    }
+
+    #sideMenu ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    #sideMenu ul li {
+      border-bottom: 1px solid #5a3e36;
+    }
+
+    #sideMenu ul li a {
+      color: white;
+      display: block;
+      padding: 12px 16px;
+      text-decoration: none;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    #sideMenu ul li a:hover,
+    #sideMenu ul li a.active {
+      background: #4b372d;
+    }
+
+    main {
+      padding: 1em;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .seccion {
+      display: none;
+      background: #fff8f0;
+      padding: 1em;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      margin-top: 1em;
+    }
+
+    .seccion.active {
+      display: block;
+    }
+
+    /* Estilos específicos de contenido (copiados y adaptados de tu CSS original) */
+    h2 {
+      color: #6d4c41;
+    }
+
+    /* Para tablas calendario */
+    .calendar-table {
+      table-layout: fixed;
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .calendar-table td, .calendar-table th {
+      border: 1px solid #bcaaa4;
+      padding: 5px;
+      background-color: #efebe9;
+      vertical-align: top;
+      font-size: 0.95em;
+      text-align: left;
+      min-height: 60px;
+      word-wrap: break-word;
+    }
+    .calendar-table th {
+      background-color: #a1887f;
+      color: white;
+      text-align: center;
+    }
+    .calendar-table td .day-number {
+      font-weight: bold;
+      display: block;
+      margin-bottom: 0.2em;
+      text-align: left;
+    }
+    .pill-emoji {
+      display: flex;
+      justify-content: center;
+      align-items: end;
+      font-size: 1.5em;
+      min-height: 30px;
+      margin-top: 1em;
+    }
+    .program-label {
+      display: block;
+      font-size: 1em;
+      color: white;
+      font-weight: bold;
+      text-align: center;
+      margin-bottom: 0.2em;
+    }
+    .calendar-table tr td:nth-child(3) {
+      background-color: #d7ccc8;
+    }
+    .calendar-table tr td:nth-child(5) {
+      background-color: #bcaaa4;
+    }
+    .highlight-day {
+      background-color: #a1887f !important;
+      color: white;
+      font-weight: bold;
+    }
+
+    @media (max-width: 600px) {
+      .calendar-table td, .calendar-table th {
+        font-size: 0.75em;
+        padding: 3px;
+      }
+      .pill-emoji {
+        font-size: 1.2em;
+      }
+    }
+
+    /* Estilos para formularios y selects */
+    select, textarea, input {
+      width: 100%;
+      padding: 0.75em;
+      margin-top: 0.5em;
+      margin-bottom: 1em;
+      border: 1px solid #a1887f;
+      border-radius: 5px;
+      font-size: 1em;
+      background: #fefefe;
+    }
+    button {
+      background: #8d6e63;
+      color: white;
+      border: none;
+      padding: 0.75em 1em;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 1em;
+    }
+    button:hover {
+      background: #a1887f;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="menu-icon" id="menuIcon" aria-label="Abrir menú">≡</div>
+    <h1>MyParkinson</h1>
+    <div class="user-icon" id="userIcon" aria-label="Menú usuario" tabindex="0" role="button" aria-haspopup="true" aria-expanded="false">👤</div>
+
+    <nav id="sideMenu">
+      <ul>
+        <li><a href="#" data-section="informacion">Información</a></li>
+        <li><a href="#" data-section="calendar">Calendario</a></li>
+        <li><a href="#" data-section="contact">Contacto</a></li>
+        <li><a href="#" data-section="registro">Registro diario</a></li>
+        <li><a href="#" data-section="resumen">Resumen semanal</a></li>
+        <li><a href="#" data-section="consejos">Consejos</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <section id="informacion" class="seccion active">
+      <h2>Información</h2>
+      <p>
+        El parkinson es una enfermedad neurodegenerativa que afecta el movimiento. Se produce cuando las células nerviosas del cerebro que controlan el movimiento se dañan o mueren.<br><br>
+        <strong>Tipos de Parkinson:</strong><br>
+        - Enfermedad de Parkinson idiopática: es la forma más común y no tiene una causa conocida.<br>
+        - Parkinson secundario: causado por otro problema de salud, como un accidente cerebrovascular o medicamentos.<br>
+        - Parkinson atípico: un grupo de trastornos que simulan el Parkinson, pero tienen características diferentes.<br><br>
+        <strong>Síntomas:</strong><br>
+        ⁃ Temblores en las manos, brazos o piernas.<br>
+        ⁃ Rigidez muscular.<br>
+        ⁃ Lentitud en los movimientos.<br>
+        ⁃ Dificultad para caminar y mantener el equilibrio.<br>
+        ⁃ Problemas con el habla y la escritura.<br><br>
+        <strong>Diagnóstico:</strong> generalmente se hace a través de la observación de los síntomas y, a veces, con pruebas de imágenes cerebrales. No hay una prueba definitiva para el Parkinson.<br><br>
+        <strong>Tratamiento:</strong><br>
+        - Medicamentos: ayudan a controlar los síntomas.<br>
+        - Terapias: fisioterapia, terapia ocupacional, y logopedia pueden mejorar la calidad de vida.<br>
+        - Cirugía: en casos graves, puede ser una opción.<br><br>
+        <strong>Parkinson's Foundation:</strong> es una organización sin fines de lucro dedicada a apoyar a personas con Parkinson y a financiar investigaciones para encontrar tratamientos y, eventualmente, una cura. Proporciona recursos educativos, apoyo a las familias y promueve el avance científico en el tratamiento de la enfermedad.
+      </p>
+    </section>
+
+    <section id="calendar" class="seccion">
+      <h2>Calendario mayo.</h2>
+      <table class="calendar-table">
+        <thead>
+          <tr>
+            <th>Lunes</th>
+            <th>Martes</th>
+            <th>Miércoles</th>
+            <th>Jueves</th>
+            <th>Viernes</th>
+            <th>Sábado</th>
+            <th>Domingo</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>
+              <div class="day-number"></div>
+              <div class="pill-emoji">💊</div>
+            </td>
+            <td>
+              <div class="day-number"></div>
+              <div class="pill-emoji">💊</div>
+            </td>
+            <td class="highlight-day">
+              <div class="day-number">1</div>
+              <div class="program-label">Programa de bienestar</div>
+              <div class="pill-emoji">💊</div>
+            </td>
+            <td>
+              <div class="day-number">2</div>
+              <div class="pill-emoji">💊</div>
+            </td>
+            <td class="highlight-day">
+              <div class="day-number">3</div>
+              <div class="program-label">Programa de ejercicio</div>
+              <div class="pill-emoji">💊</div>
+            </td>
+            <td>
+              <div class="day-number">4</div>
+              <div class="pill-emoji">💊</div>
+            </td>
+            <td>
+              <div class="day-number">5</div>
+              <div class="pill-emoji">💊</div>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <div class="day-number">6</div>
+              <div class="pill-emoji">💊</div>
+            </td>
+            <td>
+              <div class="day-number">7</div>
+              <div class="pill-emoji">💊</div>
+            </td>
+            <td class="highlight-day">
+              <div class="day-number">8</div>
+              <div class="program-label">Programa de bienestar</div>
+              <div class="pill-emoji">💊</div>
+            </td>
+            <td>
+              <div class="day-number">9</div>
+              <div class="pill-emoji">💊</div>
+            </td>
+            <td class="highlight-day">
+              <div class="day-number">10</div>
+              <div class="program-label">Programa de ejercicio</div>
+              <div class="pill-emoji">💊</div>
+            </td>
+            <td>
+              <div class="day-number">11</div>
+              <div class="pill-emoji">💊</div>
+            </td>
+            <td>
+              <div class="day-number">12</div>
+              <div class="pill-emoji">💊</div>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <div class="day-number">13</div>
+              <div class="pill-emoji">💊</div>
+            </td>
+            <td>
+              <div class="day-number">14</div>
+              <div class="pill-emoji">💊</div>
+            </td>
+            <td class="highlight-day">
+              <div class="day-number">15</div>
+              <div class="program-label">Programa de bienestar</div>
+              <div class="pill-emoji">💊</div>
+            </td>
+            <td>
+              <div class="day-number">16</div>
+              <div class="pill-emoji">💊</div>
+            </td>
+            <td class="highlight-day">
+              <div class="day-number">17</div>
+              <div class="program-label">Programa de ejercicio</div>
+              <div class="pill-emoji">💊</div>
+            </td>
+            <td>
+              <div class="day-number">18</div>
+              <div class="pill-emoji">💊</div>
+            </td>
+            <td>
+              <div class="day-number">19</div>
+              <div class="pill-emoji">💊</div>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <div class="day-number">20</div>
+              <div class="pill-emoji">💊</div>
+            </td>
+            <td>
+              <div class="day-number">21</div>
+              <div class="pill-emoji">💊</div>
+            </td>
+            <td class="highlight-day">
+              <div class="day-number">22</div>
+              <div class="program-label">Programa de bienestar</div>
+              <div class="pill-emoji">💊</div>
+            </td>
+            <td>
+              <div class="day-number">23</div>
+              <div class="pill-emoji">💊</div>
+            </td>
+            <td class="highlight-day">
+              <div class="day-number">24</div>
+              <div class="program-label">Programa de ejercicio</div>
+              <div class="pill-emoji">💊</div>
+            </td>
+            <td>
+              <div class="day-number">25</div>
+              <div class="pill-emoji">💊</div>
+            </td>
+            <td>
+              <div class="day-number">26</div>
+              <div class="pill-emoji">💊</div>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <div class="day-number">27</div>
+              <div class="pill-emoji">💊</div>
+            </td>
+            <td>
+              <div class="day-number">28</div>
+              <div class="pill-emoji">💊</div>
+            </td>
+            <td class="highlight-day">
+              <div class="day-number">29</div>
+              <div class="program-label">Programa de bienestar</div>
+              <div class="pill-emoji">💊</div>
+            </td>
+            <td>
+              <div class="day-number">30</div>
+              <div class="pill-emoji">💊</div>
+            </td>
+            <td class="highlight-day">
+              <div class="day-number">31</div>
+              <div class="program-label">Programa de ejercicio</div>
+              <div class="pill-emoji">💊</div>
+            </td>
+            <td></td>
+            <td></td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="contact" class="seccion">
+      <h2>Contacto (solo en caso necesario)</h2>
+      <label for="profesional">Selecciona el profesional</label>
+      <select id="profesional">
+        <option value="">Seleccione</option>
+        <option value="enfermera">Enfermería (Paula)</option>
+        <option value="neurologia">Equipo médico de neurología</option>
+      </select>
+
+      <label for="modalidad">Selecciona la modalidad</label>
+      <select id="modalidad">
+        <option value="">Seleccione</option>
+        <option value="presencial">Consulta presencial</option>
+        <option value="telefonica">Consulta telefónica</option>
+      </select>
+
+      <label for="motivo">Motivo de la consulta</label>
+      <textarea id="motivo" placeholder="Describa brevemente el motivo de la consulta"></textarea>
+      <p>Nos pondremos en contacto con usted para agendar una cita preferente.</p>
+
+ <button>Guardar respuestas</button>
+    </section>
+
+    <section id="registro" class="seccion">
+      <h2>Registro diario</h2>
+      <label for="actividad">Actividad física (¿en qué medida?)</label>
+      <select id="actividad">
+        <option value="">Seleccione una opción</option>
+        <option value="leve">Ligera (ej. caminar lento, estiramientos)</option>
+        <option value="moderada">Moderada (ej. caminar rápido, bicicleta estática)</option>
+        <option value="intensa">Intensa (ej. correr, ejercicio aeróbico)</option>
+      </select>
+
+      <h3>Alimentación</h3>
+      <label for="desayuno">Desayuno</label>
+      <input type="text" id="desayuno" placeholder="¿Qué comiste en el desayuno?" />
+      <label for="media-mañana">Media mañana</label>
+      <input type="text" id="media-mañana" placeholder="¿Qué comiste en la media mañana?" />
+      <label for="comida">Comida</label>
+      <input type="text" id="comida" placeholder="¿Qué comiste en la comida?" />
+      <label for="merienda">Merienda</label>
+      <input type="text" id="merienda" placeholder="¿Qué comiste en la merienda?" />
+      <label for="cena">Cena</label>
+      <input type="text" id="cena" placeholder="¿Qué comiste en la cena?" />
+
+      <h3>Bienestar</h3>
+      <label>¿Tomaste la medicación hoy?</label>
+      <select>
+        <option value="">Seleccione una opción</option>
+        <option>Sí</option>
+        <option>No, me olvidé</option>
+        <option>Sí, pero no sé si la tome bien</option>
+      </select>
+
+      <label for="planes">Cuéntame tu día ¿qué has hecho?</label>
+      <textarea id="planes" placeholder="Describe tus actividades del día..."></textarea>
+
+      <label>¿Cómo te sientes hoy?</label>
+      <select>
+        <option value="">Seleccione una opción</option>
+        <option>Bien</option>
+        <option>Regular</option>
+        <option>Mal</option>
+      </select>
+
+      <label>¿Por qué te sientes así?</label>
+      <textarea placeholder="Explica aquí..."></textarea>
+
+      <button>Guardar respuestas</button>
+    </section>
+
+    <section id="resumen" class="seccion">
+      <h2>Resumen semanal</h2>
+      <canvas id="actividadChart"></canvas>
+      <canvas id="alimentacionChart"></canvas>
+      <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+      <script>
+        const ctxActividad = document.getElementById('actividadChart').getContext('2d');
+        new Chart(ctxActividad, {
+          type: 'bar',
+          data: {
+            labels: ['L', 'M', 'X', 'J', 'V', 'S', 'D'],
+            datasets: [{
+              label: 'Actividad física',
+              data: [3, 2, 4, 2, 5, 3, 1],
+              backgroundColor: '#8d6e63'
+            }]
+          }
+        });
+
+        const ctxAlimentacion = document.getElementById('alimentacionChart').getContext('2d');
+        new Chart(ctxAlimentacion, {
+          type: 'line',
+          data: {
+            labels: ['L', 'M', 'X', 'J', 'V', 'S', 'D'],
+            datasets: [{
+              label: 'Alimentación',
+              data: [6, 7, 8, 6, 7, 5, 7],
+              borderColor: '#6d4c41',
+              backgroundColor: 'rgba(109, 76, 65, 0.1)',
+              fill: true
+            }]
+          }
+        });
+      </script>
+    </section>
+
+    <section id="consejos" class="seccion">
+      <h2>Consejos de Parkinson’s Foundation</h2>
+      <ul>
+        <li>Recuerda seguir la alimentación que acordamos en consulta.</li>
+        <li>No olvides tomar tu medicación.</li>
+        <li>Haz ejercicio todos los días.</li>
+        <li>Mantén tu mente activa.</li>
+      </ul>
+      <div style="display:flex; gap:1em; flex-wrap: wrap;">
+        <iframe width="100%" height="200" src="https://www.youtube.com/embed/toHHvMTEshw?si=29URSjXtRHKBD0u4" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+        <iframe width="100%" height="200" src="https://www.youtube.com/embed/gyxaw5nQpxo?si=DzrAlkYikLo1C14u" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const menuIcon = document.getElementById('menuIcon');
+    const sideMenu = document.getElementById('sideMenu');
+    const links = sideMenu.querySelectorAll('a');
+    const secciones = document.querySelectorAll('.seccion');
+
+    menuIcon.addEventListener('click', () => {
+      sideMenu.classList.toggle('show');
+    });
+
+    links.forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const targetSection = e.target.getAttribute('data-section');
+
+        // Mostrar solo la sección seleccionada
+        secciones.forEach(seccion => {
+          if (seccion.id === targetSection) {
+            seccion.classList.add('active');
+          } else {
+            seccion.classList.remove('active');
+          }
+        });
+
+        // Marcar el link activo
+        links.forEach(l => l.classList.remove('active'));
+        e.target.classList.add('active');
+
+        // Cerrar el menú después de seleccionar
+        sideMenu.classList.remove('show');
+      });
+    });
+
+    // Cerrar menú si clic fuera del menú y el icono
+    document.addEventListener('click', (e) => {
+      if (!sideMenu.contains(e.target) && e.target !== menuIcon) {
+        sideMenu.classList.remove('show');
+      }
+    });
+
+    // Inicializar link activo en Información
+    window.addEventListener('load', () => {
+      links.forEach(link => {
+        if(link.getAttribute('data-section') === 'informacion') {
+          link.classList.add('active');
+        }
+      });
+    });
+
+  </script>
+</body>
+</html>
